@@ -481,6 +481,78 @@
     }
     .accordion-body.hidden { display: none; }
 
+    /* Phrase section */
+    .phrase-filter {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 8px 0 12px;
+    }
+    .phrase-cat-btn {
+      padding: 5px 12px;
+      border-radius: 20px;
+      border: 1.5px solid var(--parchment);
+      background: var(--cream);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .phrase-cat-btn.active {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: var(--gold-light);
+    }
+    .phrase-card {
+      background: var(--white);
+      border: 1.5px solid var(--parchment);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+    }
+    .phrase-italian {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 16px;
+      color: var(--ink);
+      margin-bottom: 3px;
+    }
+    .phrase-pronunc {
+      font-size: 11.5px;
+      color: var(--terracotta);
+      margin-bottom: 4px;
+      letter-spacing: 0.01em;
+    }
+    .phrase-english {
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .phrase-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .phrase-difficulty {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+    .diff-easy   { background: #E8F5EC; color: #3A7D50; }
+    .diff-medium { background: #FEF5E4; color: #9A6B1A; }
+    .diff-hard   { background: #FDECEA; color: #9E3F1A; }
+    .phrase-tip {
+      font-size: 11px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
     /* Remove old section-label since it's now inside accordion header */
     .empty-state {
       text-align: center;
@@ -638,6 +710,26 @@
     <div class="guide-item tip-optional">💅 <strong>Spa / Salon:</strong> Not required; up to 10% for exceptional service.</div>
     </div><!-- end bodyGuide -->
   </div><!-- end panelGuide -->
+
+  <!-- Step 4: Useful Phrases -->
+  <div class="accordion-panel" id="panelPhrases">
+    <div class="accordion-header" onclick="togglePanel('panelPhrases')">
+      <div class="accordion-header-left">
+        <span class="accordion-step">4</span>
+        <span class="accordion-title">Useful Italian Phrases</span>
+      </div>
+      <span class="accordion-chevron" id="chevronPhrases">▼</span>
+    </div>
+    <div class="accordion-body hidden" id="bodyPhrases">
+
+      <!-- Category filter -->
+      <div class="phrase-filter" id="phraseFilter"></div>
+
+      <!-- Phrase cards -->
+      <div id="phraseList"></div>
+
+    </div>
+  </div>
 
 </div><!-- end main -->
 
@@ -895,7 +987,7 @@
       }
     },
     other: {
-      showBill: true,
+      label: 'Other Situation',
       showServizio: false,
       showParty: false,
       extraInputs: [
@@ -975,38 +1067,6 @@
   function showCopertoNote() {
     const checked = document.getElementById('copertoCheck').checked;
     document.getElementById('copertoNote').classList.toggle('hidden', !checked);
-  }
-
-  function togglePanel(id) {
-    // Don't allow opening panel 2 without a scenario selected
-    if (id === 'panelTipping' && !currentScenario) return;
-    const panel = document.getElementById(id);
-    const body = document.getElementById(id.replace('panel', 'body'));
-    const chevron = document.getElementById(id.replace('panel', 'chevron'));
-    const isOpen = !body.classList.contains('hidden');
-    if (isOpen) {
-      body.classList.add('hidden');
-      panel.classList.remove('active');
-      chevron.textContent = '▼';
-      chevron.style.transform = '';
-    } else {
-      body.classList.remove('hidden');
-      panel.classList.add('active');
-      chevron.textContent = '▲';
-      chevron.style.transform = '';
-      // collapse the others
-      ['panelSituation', 'panelTipping', 'panelGuide'].forEach(other => {
-        if (other !== id) {
-          const ob = document.getElementById(other.replace('panel', 'body'));
-          const oc = document.getElementById(other.replace('panel', 'chevron'));
-          const op = document.getElementById(other);
-          ob.classList.add('hidden');
-          op.classList.remove('active');
-          oc.textContent = '▼';
-          oc.style.transform = '';
-        }
-      });
-    }
   }
 
   function toggleGuide() {
@@ -1252,6 +1312,153 @@
       </div>
       ${perPersonHTML}
     `;
+  }
+
+  // ── Phrases ──────────────────────────────────────────────────────────────
+
+  const phraseData = {
+    'Greetings': [
+      { it: 'Buongiorno.', pr: 'bwon-JOR-no', en: 'Good morning / Good day.', diff: 'easy', tip: 'Use until ~3pm; switch to Buonasera after.' },
+      { it: 'Buonasera.', pr: 'bwon-a-SAIR-a', en: 'Good evening.', diff: 'easy', tip: 'Use from late afternoon onward.' },
+      { it: 'Ciao!', pr: 'chow', en: 'Hi / Bye (informal).', diff: 'easy', tip: 'Fine with peers; use Buongiorno/Arrivederci with staff.' },
+      { it: 'Arrivederci.', pr: 'ah-ree-veh-DAIR-chee', en: 'Goodbye.', diff: 'medium', tip: 'Polite farewell for shops, restaurants, hotels.' },
+      { it: 'Per favore.', pr: 'pair fa-VOH-ray', en: 'Please.', diff: 'easy', tip: 'Add to almost any request to soften it.' },
+      { it: 'Grazie.', pr: 'GRAT-syeh', en: 'Thank you.', diff: 'easy', tip: null },
+      { it: 'Grazie mille.', pr: 'GRAT-syeh MEE-leh', en: 'Thank you very much.', diff: 'easy', tip: 'Literally "a thousand thanks." Warmly received.' },
+      { it: 'Prego.', pr: 'PREH-go', en: 'You\'re welcome / Please / Go ahead.', diff: 'easy', tip: 'Versatile word — also said when handing something to someone.' },
+      { it: 'Mi scusi.', pr: 'mee SKOO-zee', en: 'Excuse me (formal).', diff: 'easy', tip: 'Use to get attention or apologize. Scusi alone works fine too.' },
+      { it: 'Permesso.', pr: 'pair-MES-so', en: 'Excuse me (passing through).', diff: 'easy', tip: 'For squeezing past people in a crowd or narrow space.' },
+      { it: 'Piacere.', pr: 'pya-CHAIR-eh', en: 'Nice to meet you.', diff: 'medium', tip: 'Said when introduced to someone.' },
+    ],
+    'Restaurant': [
+      { it: 'Un tavolo per due, per favore.', pr: 'oon TAH-vo-lo pair DOO-eh', en: 'A table for two, please.', diff: 'medium', tip: 'Swap due for tre (3), quattro (4), etc.' },
+      { it: 'Il menù, per favore.', pr: 'eel meh-NOO', en: 'The menu, please.', diff: 'easy', tip: null },
+      { it: 'Cosa mi consiglia?', pr: 'KO-za mee con-SEE-lya', en: 'What do you recommend?', diff: 'medium', tip: 'Italians love this question — expect an enthusiastic answer.' },
+      { it: 'Vorrei questo.', pr: 'vor-RAY KWES-to', en: 'I would like this one.', diff: 'easy', tip: 'Point at the menu item. No Italian required beyond this.' },
+      { it: 'È incluso il servizio?', pr: 'eh een-KLOO-zo eel sair-VEE-tsyo', en: 'Is the service charge included?', diff: 'hard', tip: 'Key question before deciding whether to tip.' },
+      { it: 'Il conto, per favore.', pr: 'eel KON-to', en: 'The bill, please.', diff: 'easy', tip: 'Don\'t wait — you must ask. Italians won\'t bring it unsolicited.' },
+      { it: 'Era tutto ottimo.', pr: 'AIR-a TOO-to OT-tee-mo', en: 'Everything was excellent.', diff: 'medium', tip: 'Said at the end of a meal. Always appreciated.' },
+      { it: 'Tenga il resto.', pr: 'TEN-ga eel RES-to', en: 'Keep the change.', diff: 'medium', tip: 'Said while handing over cash.' },
+      { it: 'Senza glutine, per favore.', pr: 'SEN-tsa GLOO-tee-neh', en: 'Gluten-free, please.', diff: 'hard', tip: 'Italy is actually very gluten-free aware; this is widely understood.' },
+      { it: 'Sono allergico a...', pr: 'SO-no al-LAIR-jee-ko a', en: 'I am allergic to...', diff: 'hard', tip: 'Follow with: noci (nuts), latticini (dairy), frutti di mare (shellfish).' },
+    ],
+    'Hotel': [
+      { it: 'Ho una prenotazione.', pr: 'o OO-na preh-no-ta-TSYO-neh', en: 'I have a reservation.', diff: 'medium', tip: null },
+      { it: 'A che ora è il check-out?', pr: 'a keh OR-a eh eel check-out', en: 'What time is check-out?', diff: 'medium', tip: 'Check-out is widely understood in Italian hotels.' },
+      { it: 'Può portare i miei bagagli?', pr: 'pwo por-TAR-eh ee mYAY ba-GAL-yee', en: 'Can you bring my luggage?', diff: 'hard', tip: 'Alternatively just say bagagli and gesture.' },
+      { it: 'C\'è il Wi-Fi?', pr: 'cheh eel wee-fee', en: 'Is there Wi-Fi?', diff: 'easy', tip: 'Password is often "password" spelled out — ask: Qual è la password?' },
+      { it: 'C\'è un problema con la camera.', pr: 'cheh oon pro-BLEH-ma kon la KAH-meh-ra', en: 'There is a problem with the room.', diff: 'hard', tip: 'Point and gesture after saying this.' },
+      { it: 'Può chiamarmi un taxi?', pr: 'pwo kya-MAR-mee oon TAX-ee', en: 'Can you call me a taxi?', diff: 'hard', tip: 'Easy to say slowly; staff will understand immediately.' },
+    ],
+    'Getting Around': [
+      { it: 'Dov\'è...?', pr: 'do-VEH', en: 'Where is...?', diff: 'easy', tip: 'Follow with: il bagno (bathroom), la stazione (station), il centro (city center).' },
+      { it: 'Come si arriva a...?', pr: 'KO-meh see ar-REE-va a', en: 'How do I get to...?', diff: 'hard', tip: 'Locals may answer in rapid Italian — have a map ready to point at.' },
+      { it: 'Quanto è lontano?', pr: 'KWON-to eh lon-TAH-no', en: 'How far is it?', diff: 'medium', tip: null },
+      { it: 'A piedi o in autobus?', pr: 'a PYEH-dee o een ow-TO-boos', en: 'On foot or by bus?', diff: 'medium', tip: 'Useful follow-up after asking for directions.' },
+      { it: 'Un biglietto per...', pr: 'oon beel-YET-to pair', en: 'One ticket to...', diff: 'easy', tip: 'Works at train stations, vaporetto stops, bus kiosks.' },
+      { it: 'A che ora parte il treno?', pr: 'a keh OR-a PAR-teh eel TREH-no', en: 'What time does the train leave?', diff: 'hard', tip: null },
+      { it: 'È questo il treno per Roma?', pr: 'eh KWES-to eel TREH-no pair RO-ma', en: 'Is this the train to Rome?', diff: 'medium', tip: 'Swap Roma for your destination.' },
+      { it: 'Mi sono perso/a.', pr: 'mee SO-no PAIR-so/a', en: 'I am lost.', diff: 'easy', tip: 'Perso = male speaker, Persa = female speaker.' },
+    ],
+    'Shopping': [
+      { it: 'Quanto costa?', pr: 'KWON-to KOS-ta', en: 'How much does it cost?', diff: 'easy', tip: 'The single most useful shopping phrase.' },
+      { it: 'Sto solo guardando.', pr: 'sto SO-lo gwar-DAN-do', en: 'I\'m just looking.', diff: 'medium', tip: 'Politely deflects overeager shopkeepers.' },
+      { it: 'Posso provarlo?', pr: 'POS-so pro-VAR-lo', en: 'Can I try it on?', diff: 'medium', tip: 'For clothing. Provarlo = try it (masculine item); provarla for feminine.' },
+      { it: 'Lo prendo.', pr: 'lo PREN-do', en: 'I\'ll take it.', diff: 'easy', tip: null },
+      { it: 'È troppo caro.', pr: 'eh TROP-po KAH-ro', en: 'It\'s too expensive.', diff: 'easy', tip: 'Sometimes opens a negotiation at markets.' },
+      { it: 'Avete una taglia più grande?', pr: 'a-VEH-teh OO-na TAL-ya pyoo GRAN-deh', en: 'Do you have a larger size?', diff: 'hard', tip: 'Più piccola = smaller size.' },
+      { it: 'Accettate carte di credito?', pr: 'ah-chet-TAH-teh KAR-teh dee CREH-dee-to', en: 'Do you accept credit cards?', diff: 'hard', tip: 'Many smaller shops are cash-only, especially outside cities.' },
+    ],
+    'Small Talk': [
+      { it: 'Di dove sei?', pr: 'dee DO-veh say', en: 'Where are you from? (informal)', diff: 'easy', tip: 'Use with fellow tourists. For locals: Di dov\'è? (formal).' },
+      { it: 'Sono americano/a.', pr: 'SO-no a-meh-ree-KAH-no/a', en: 'I am American.', diff: 'easy', tip: '-o for male speaker, -a for female.' },
+      { it: 'Parla inglese?', pr: 'PAR-la een-GLEH-zeh', en: 'Do you speak English?', diff: 'easy', tip: 'Always appreciated to ask in Italian first.' },
+      { it: 'Non parlo molto italiano.', pr: 'non PAR-lo MOL-to ee-tal-YAH-no', en: 'I don\'t speak much Italian.', diff: 'medium', tip: 'Sets realistic expectations and earns goodwill.' },
+      { it: 'Sto imparando l\'italiano.', pr: 'sto eem-pa-RAN-do lee-tal-YAH-no', en: 'I\'m learning Italian.', diff: 'hard', tip: 'Italians genuinely love hearing this from tourists.' },
+      { it: 'L\'Italia è bellissima.', pr: 'lee-TAL-ya eh bel-EES-see-ma', en: 'Italy is beautiful.', diff: 'medium', tip: null },
+      { it: 'Il cibo è delizioso.', pr: 'eel CHEE-bo eh deh-lee-TSYO-zo', en: 'The food is delicious.', diff: 'medium', tip: 'Guaranteed to make any cook or server beam.' },
+      { it: 'Mi piace molto.', pr: 'mee PYAH-cheh MOL-to', en: 'I like it very much.', diff: 'easy', tip: 'Works for food, art, places, experiences.' },
+    ],
+    'Emergencies': [
+      { it: 'Aiuto!', pr: 'a-YOO-to', en: 'Help!', diff: 'easy', tip: null },
+      { it: 'Ho bisogno di un medico.', pr: 'o bee-ZON-yo dee oon MEH-dee-ko', en: 'I need a doctor.', diff: 'hard', tip: 'Say clearly and slowly. Most urban Italians will understand.' },
+      { it: 'Chiami la polizia!', pr: 'KYA-mee la po-lee-TSEE-a', en: 'Call the police!', diff: 'hard', tip: 'Emergency number in Italy: 112.' },
+      { it: 'Mi hanno rubato il portafoglio.', pr: 'mee AN-no roo-BAH-to eel por-ta-FOL-yo', en: 'My wallet was stolen.', diff: 'hard', tip: 'Portafoglio = wallet; telefono = phone; borsa = bag.' },
+      { it: 'Non capisco.', pr: 'non ka-PEE-sko', en: 'I don\'t understand.', diff: 'easy', tip: 'Honest and useful. Locals will often slow down or rephrase.' },
+      { it: 'Può ripetere più lentamente?', pr: 'pwo ree-peh-TEH-reh pyoo len-ta-MEN-teh', en: 'Can you repeat more slowly?', diff: 'hard', tip: 'Most useful phrase for a beginner. Memorize this one.' },
+    ],
+  };
+
+  let activePhraseCategory = 'Greetings';
+
+  function initPhrases() {
+    const filterEl = document.getElementById('phraseFilter');
+    filterEl.innerHTML = '';
+    Object.keys(phraseData).forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = 'phrase-cat-btn' + (cat === activePhraseCategory ? ' active' : '');
+      btn.textContent = cat;
+      btn.onclick = () => {
+        activePhraseCategory = cat;
+        document.querySelectorAll('.phrase-cat-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderPhrases();
+      };
+      filterEl.appendChild(btn);
+    });
+    renderPhrases();
+  }
+
+  function renderPhrases() {
+    const list = document.getElementById('phraseList');
+    const phrases = phraseData[activePhraseCategory] || [];
+    list.innerHTML = phrases.map(p => {
+      const diffClass = p.diff === 'easy' ? 'diff-easy' : p.diff === 'medium' ? 'diff-medium' : 'diff-hard';
+      const diffLabel = p.diff === 'easy' ? 'Easy to say' : p.diff === 'medium' ? 'Practice first' : 'Recognition only';
+      const tipHTML = p.tip ? `<span class="phrase-tip">${p.tip}</span>` : '';
+      return `<div class="phrase-card">
+        <div class="phrase-italian">"${p.it}"</div>
+        <div class="phrase-pronunc">${p.pr}</div>
+        <div class="phrase-english">${p.en}</div>
+        <div class="phrase-meta">
+          <span class="phrase-difficulty ${diffClass}">${diffLabel}</span>
+          ${tipHTML}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Init phrases when panel opens
+  function togglePanel(id) {
+    // Don't allow opening panel 2 without a scenario selected
+    if (id === 'panelTipping' && !currentScenario) return;
+    const panel = document.getElementById(id);
+    const body = document.getElementById(id.replace('panel', 'body'));
+    const chevron = document.getElementById(id.replace('panel', 'chevron'));
+    const isOpen = !body.classList.contains('hidden');
+    if (isOpen) {
+      body.classList.add('hidden');
+      panel.classList.remove('active');
+      chevron.textContent = '▼';
+      chevron.style.transform = '';
+    } else {
+      body.classList.remove('hidden');
+      panel.classList.add('active');
+      chevron.textContent = '▲';
+      chevron.style.transform = '';
+      ['panelSituation', 'panelTipping', 'panelGuide', 'panelPhrases'].forEach(other => {
+        if (other !== id) {
+          const ob = document.getElementById(other.replace('panel', 'body'));
+          const oc = document.getElementById(other.replace('panel', 'chevron'));
+          const op = document.getElementById(other);
+          ob.classList.add('hidden');
+          op.classList.remove('active');
+          oc.textContent = '▼';
+          oc.style.transform = '';
+        }
+      });
+      if (id === 'panelPhrases') initPhrases();
+    }
   }
 </script>
 
