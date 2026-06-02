@@ -907,6 +907,16 @@
           { value: 'musician', label: 'Street performer' }
         ]}
       ],
+      onTypeChange(val) {
+        const noBill = ['cloakroom', 'restroom', 'musician'];
+        const billRow = document.getElementById('billRow');
+        if (noBill.includes(val)) {
+          billRow.classList.add('hidden');
+          document.getElementById('billInput').value = '';
+        } else {
+          billRow.classList.remove('hidden');
+        }
+      },
       calc(bill, party, opts) {
         const map = {
           spa: {
@@ -1108,7 +1118,11 @@
           opt.textContent = o.label;
           sel.appendChild(opt);
         });
-        sel.onchange = () => { updateConditionalInputs(s); calculate(); };
+        sel.onchange = () => {
+          updateConditionalInputs(s);
+          if (s.onTypeChange) s.onTypeChange(sel.value);
+          calculate();
+        };
         row.appendChild(label);
         row.appendChild(sel);
       } else if (inp.type === 'number') {
@@ -1128,6 +1142,14 @@
     });
 
     updateConditionalInputs(s);
+    // Fire onTypeChange for the initial selected value
+    if (s.onTypeChange) {
+      const primarySel = s.extraInputs.find(i => i.type === 'select' && !i.showFor);
+      if (primarySel) {
+        const el = document.getElementById(primarySel.id);
+        if (el) s.onTypeChange(el.value);
+      }
+    }
   }
 
   function updateConditionalInputs(s) {
