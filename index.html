@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>026 · Tippy Tip</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --cream: #F5F0E8;
+      --parchment: #EDE7D9;
+      --terracotta: #C4572A;
+      --terracotta-light: #D9704A;
+      --terracotta-dark: #9E3F1A;
+      --olive: #5C6B3A;
+      --gold: #B8963E;
+      --gold-light: #D4AF5A;
+      --ink: #1E1A14;
+      --ink-soft: #3D3428;
+      --muted: #8A7D6B;
+      --white: #FDFAF5;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--cream);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      padding-bottom: calc(32px + env(safe-area-inset-bottom));
+    }
+
+    /* Header */
+    .header {
+      background: var(--ink);
+      padding: 20px 24px 16px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 8px,
+        rgba(184,150,62,0.06) 8px,
+        rgba(184,150,62,0.06) 9px
+      );
+    }
+    .header-flag {
+      font-size: 28px;
+      line-height: 1;
+      margin-bottom: 4px;
+      position: relative;
+    }
+    .header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      color: var(--gold-light);
+      letter-spacing: 0.02em;
+      position: relative;
+    }
+    .header p {
+      font-size: 12px;
+      color: rgba(255,255,255,0.45);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-top: 4px;
+      font-weight: 300;
+      position: relative;
+    }
+    .app-number {
+      position: absolute;
+      top: 14px;
+      right: 16px;
+      font-size: 10px;
+      color: rgba(255,255,255,0.2);
+      letter-spacing: 0.08em;
+      font-weight: 500;
+    }
+
+    /* Main */
+    .main {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 24px 16px 0;
+    }
+
+    /* Scenario selector */
+    .section-label {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 10px;
+    }
+
+    .scenario-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 4px;
+      padding-top: 4px;
+    }
+
+    .scenario-btn {
+      background: var(--white);
+      border: 1.5px solid var(--parchment);
+      border-radius: 10px;
+      padding: 14px 12px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.18s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .scenario-btn:active { transform: scale(0.97); }
+    .scenario-btn.active {
+      border-color: var(--terracotta);
+      background: #FEF5F1;
+      box-shadow: 0 0 0 3px rgba(196,87,42,0.12);
+    }
+    .scenario-btn .s-icon { font-size: 20px; line-height: 1; }
+    .scenario-btn .s-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink-soft);
+    }
+    .scenario-btn.active .s-name { color: var(--terracotta-dark); }
+
+    /* Bill input */
+    .bill-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--white);
+      border: 1.5px solid var(--parchment);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+    .bill-row label {
+      font-size: 13px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .euro-symbol {
+      font-size: 18px;
+      color: var(--gold);
+      font-weight: 500;
+    }
+    .bill-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--ink);
+      text-align: right;
+      width: 100%;
+    }
+    .bill-input::placeholder { color: var(--parchment); }
+
+    /* Toggles */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--white);
+      border: 1.5px solid var(--parchment);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+    }
+    .toggle-label {
+      font-size: 13px;
+      color: var(--ink-soft);
+    }
+    .toggle-label span {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: var(--parchment);
+      border-radius: 26px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle input:checked + .toggle-track { background: var(--terracotta); }
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .toggle input:checked + .toggle-track::after { transform: translateX(18px); }
+
+    /* Party size */
+    .party-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--white);
+      border: 1.5px solid var(--parchment);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 24px;
+    }
+    .party-label { font-size: 13px; color: var(--ink-soft); }
+    .party-controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .party-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 1.5px solid var(--parchment);
+      background: var(--cream);
+      font-size: 18px;
+      color: var(--terracotta);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      transition: all 0.15s;
+    }
+    .party-btn:active { background: var(--terracotta); color: white; }
+    .party-count { font-size: 18px; font-weight: 500; min-width: 24px; text-align: center; }
+
+    /* Result card */
+    .result-card {
+      background: var(--ink);
+      border-radius: 16px;
+      padding: 24px 20px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .result-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 12px,
+        rgba(184,150,62,0.04) 12px,
+        rgba(184,150,62,0.04) 13px
+      );
+    }
+    .result-verdict {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      position: relative;
+    }
+    .verdict-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .verdict-dot.yes { background: #6DBF82; }
+    .verdict-dot.optional { background: var(--gold-light); }
+    .verdict-dot.no { background: #E07070; }
+    .verdict-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      color: var(--white);
+    }
+
+    .result-amounts {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .amount-box {
+      background: rgba(255,255,255,0.06);
+      border-radius: 10px;
+      padding: 12px 10px;
+      text-align: center;
+    }
+    .amount-box .a-label {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      margin-bottom: 4px;
+    }
+    .amount-box .a-value {
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--gold-light);
+    }
+    .amount-box.highlight {
+      background: rgba(184,150,62,0.15);
+      border: 1px solid rgba(184,150,62,0.3);
+    }
+    .amount-box.highlight .a-value { color: #F0C96E; }
+
+    .result-note {
+      font-size: 12.5px;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.55;
+      position: relative;
+    }
+    .result-note strong { color: rgba(255,255,255,0.75); font-weight: 500; }
+
+    /* Per-person breakdown */
+    .per-person {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      border: 1.5px solid var(--parchment);
+    }
+    .per-person-title {
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .per-person-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .pp-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+    .pp-item .pp-label { color: var(--muted); }
+    .pp-item .pp-val { font-weight: 500; color: var(--ink-soft); }
+
+    /* Custom inputs per scenario */
+    .extra-inputs { margin-bottom: 16px; }
+    .extra-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--white);
+      border: 1.5px solid var(--parchment);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+    }
+    .extra-row label { font-size: 13px; color: var(--ink-soft); }
+    .extra-row select {
+      border: none;
+      outline: none;
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: var(--terracotta-dark);
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    /* Tip guide pull-out */
+    .guide-section { margin-bottom: 32px; }
+    .guide-title {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 500;
+      margin-bottom: 10px;
+    }
+    .guide-item {
+      background: var(--white);
+      border-left: 3px solid var(--parchment);
+      border-radius: 0 8px 8px 0;
+      padding: 10px 14px;
+      margin-bottom: 6px;
+      font-size: 12.5px;
+      color: var(--ink-soft);
+      line-height: 1.5;
+    }
+    .guide-item.tip-yes { border-left-color: #6DBF82; }
+    .guide-item.tip-optional { border-left-color: var(--gold); }
+    .guide-item.tip-no { border-left-color: #E07070; }
+
+    /* Accordion panels */
+    .accordion-panel {
+      border: 1.5px solid var(--parchment);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .accordion-panel.active {
+      border-color: var(--terracotta);
+      box-shadow: 0 0 0 3px rgba(196,87,42,0.1);
+    }
+    .accordion-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      cursor: pointer;
+      background: var(--white);
+      user-select: none;
+      transition: background 0.15s;
+    }
+    .accordion-header:active { background: var(--parchment); }
+    .accordion-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .accordion-step {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--parchment);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.2s, color 0.2s;
+    }
+    .accordion-panel.active .accordion-step {
+      background: var(--terracotta);
+      color: white;
+    }
+    .accordion-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink-soft);
+    }
+    .accordion-panel.active .accordion-title {
+      color: var(--terracotta-dark);
+    }
+    .accordion-chevron {
+      font-size: 10px;
+      color: var(--muted);
+      transition: transform 0.2s;
+    }
+    .accordion-panel.disabled .accordion-header {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+      padding: 0 12px 12px;
+      background: var(--white);
+    }
+    .accordion-body.hidden { display: none; }
+
+    /* Remove old section-label since it's now inside accordion header */
+    .empty-state {
+      text-align: center;
+      padding: 32px 20px;
+      color: var(--muted);
+    }
+    .empty-state .e-icon { font-size: 40px; margin-bottom: 10px; }
+    .empty-state p { font-size: 13px; line-height: 1.5; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="app-number">026 · AppADay</div>
+  <div class="header-flag">🇮🇹</div>
+  <h1>Tippy Tip</h1>
+  <p>Italian Tipping Guide</p>
+</div>
+
+<div class="main">
+
+  <!-- Step 1: Situation -->
+  <div class="accordion-panel active" id="panelSituation">
+    <div class="accordion-header" onclick="togglePanel('panelSituation')">
+      <div class="accordion-header-left">
+        <span class="accordion-step">1</span>
+        <span class="accordion-title">What's the situation?</span>
+      </div>
+      <span class="accordion-chevron" id="chevronSituation">▲</span>
+    </div>
+    <div class="accordion-body" id="bodySituation">
+      <div class="scenario-grid" id="scenarioGrid">
+        <button class="scenario-btn" data-id="restaurant" onclick="selectScenario('restaurant')">
+          <span class="s-icon">🍽️</span>
+          <span class="s-name">Restaurant</span>
+        </button>
+        <button class="scenario-btn" data-id="cafe" onclick="selectScenario('cafe')">
+          <span class="s-icon">☕</span>
+          <span class="s-name">Café / Bar</span>
+        </button>
+        <button class="scenario-btn" data-id="hotel" onclick="selectScenario('hotel')">
+          <span class="s-icon">🏨</span>
+          <span class="s-name">Hotel</span>
+        </button>
+        <button class="scenario-btn" data-id="taxi" onclick="selectScenario('taxi')">
+          <span class="s-icon">🚕</span>
+          <span class="s-name">Taxi / Driver</span>
+        </button>
+        <button class="scenario-btn" data-id="tour" onclick="selectScenario('tour')">
+          <span class="s-icon">🗺️</span>
+          <span class="s-name">Tour Guide</span>
+        </button>
+        <button class="scenario-btn" data-id="venice" onclick="selectScenario('venice')">
+          <span class="s-icon">🚤</span>
+          <span class="s-name">Venice</span>
+        </button>
+        <button class="scenario-btn" data-id="other" onclick="selectScenario('other')">
+          <span class="s-icon">✨</span>
+          <span class="s-name">Other</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Tipping Details -->
+  <div class="accordion-panel disabled" id="panelTipping">
+    <div class="accordion-header" onclick="togglePanel('panelTipping')">
+      <div class="accordion-header-left">
+        <span class="accordion-step">2</span>
+        <span class="accordion-title" id="tippingPanelTitle">Tipping Details</span>
+      </div>
+      <span class="accordion-chevron" id="chevronTipping">▼</span>
+    </div>
+    <div class="accordion-body hidden" id="bodyTipping">
+
+      <!-- Bill input -->
+      <div id="billRow" class="bill-row hidden">
+        <label>Bill total</label>
+        <span class="euro-symbol">€</span>
+        <input class="bill-input" type="number" id="billInput" inputmode="decimal" placeholder="0.00" oninput="calculate()" />
+      </div>
+
+      <!-- Extra scenario-specific inputs -->
+      <div class="extra-inputs" id="extraInputs"></div>
+
+      <!-- Servizio toggle -->
+      <div class="toggle-row hidden" id="servizioRow">
+        <div class="toggle-label">
+          Servizio incluso on bill?
+          <span>Service charge already included</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="servizioCheck" onchange="calculate()" />
+          <div class="toggle-track"></div>
+        </label>
+      </div>
+
+      <!-- Coperto toggle -->
+      <div class="toggle-row hidden" id="copertoRow">
+        <div class="toggle-label">
+          Coperto on bill?
+          <span>Cover charge for bread &amp; table setting — not a tip</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="copertoCheck" onchange="showCopertoNote()" />
+          <div class="toggle-track"></div>
+        </label>
+      </div>
+      <div id="copertoNote" class="hidden" style="background:#FEF5F1;border:1.5px solid rgba(196,87,42,0.2);border-radius:10px;padding:11px 14px;margin-bottom:8px;font-size:12.5px;color:var(--ink-soft);line-height:1.55;">
+        ℹ️ <strong>Coperto</strong> (€1–3 per person) covers your bread, place setting, and seated service. It is <em>not</em> a tip and goes to the house — not the staff. You still tip separately based on whether servizio is included.
+      </div>
+
+      <!-- Party size -->
+      <div class="party-row" id="partyRow">
+        <span class="party-label">Party size</span>
+        <div class="party-controls">
+          <button class="party-btn" onclick="changeParty(-1)">−</button>
+          <span class="party-count" id="partyCount">1</span>
+          <button class="party-btn" onclick="changeParty(1)">+</button>
+        </div>
+      </div>
+
+      <!-- Result -->
+      <div id="resultArea"></div>
+
+    </div>
+  </div>
+
+  <!-- Step 3: Quick Reference -->
+  <div class="accordion-panel" id="panelGuide">
+    <div class="accordion-header" onclick="togglePanel('panelGuide')">
+      <div class="accordion-header-left">
+        <span class="accordion-step">3</span>
+        <span class="accordion-title">Quick Italian Tipping Reference</span>
+      </div>
+      <span class="accordion-chevron" id="chevronGuide">▼</span>
+    </div>
+    <div class="accordion-body hidden" id="bodyGuide">
+    <div class="guide-item tip-yes">🍽️ <strong>Restaurant (no servizio):</strong> 5–10% of bill, left as cash on the table.</div>
+    <div class="guide-item tip-optional">🍽️ <strong>Restaurant (servizio included):</strong> No tip required — round up or leave €1–5 for exceptional service.</div>
+    <div class="guide-item tip-no">☕ <strong>Café at the counter:</strong> No tip expected. Standing orders don't warrant gratuity.</div>
+    <div class="guide-item tip-optional">☕ <strong>Café with table service:</strong> €0.50–€1, or round up.</div>
+    <div class="guide-item tip-optional">🏨 <strong>Hotel porter:</strong> €1–2 per bag.</div>
+    <div class="guide-item tip-optional">🏨 <strong>Housekeeping:</strong> €1–2 per night, left daily.</div>
+    <div class="guide-item tip-optional">🏨 <strong>Room service:</strong> Not required; €1–2 is a kind gesture.</div>
+    <div class="guide-item tip-optional">🏨 <strong>Concierge:</strong> €5–10 routine; €15+ for difficult reservations.</div>
+    <div class="guide-item tip-optional">🚕 <strong>Taxi:</strong> Round up. €2–5 for airport transfers.</div>
+    <div class="guide-item tip-yes">🗺️ <strong>Tour guide (group):</strong> €2–5 per person.</div>
+    <div class="guide-item tip-yes">🗺️ <strong>Tour guide (private):</strong> €30–100 depending on length and quality.</div>
+    <div class="guide-item tip-optional">🚤 <strong>Gondola (Venice):</strong> Not expected; €5–10 if the experience was exceptional.</div>
+    <div class="guide-item tip-optional">🚤 <strong>Water taxi (Venice):</strong> 5–10%, especially with luggage help.</div>
+    <div class="guide-item tip-optional">🧥 <strong>Cloakroom:</strong> €0.75–€1 per item. Coins are fine here.</div>
+    <div class="guide-item tip-optional">💅 <strong>Spa / Salon:</strong> Not required; up to 10% for exceptional service.</div>
+    </div><!-- end bodyGuide -->
+  </div><!-- end panelGuide -->
+
+</div><!-- end main -->
+
+<script>
+  let currentScenario = null;
+  let partySize = 1;
+
+  const scenarios = {
+    restaurant: {
+      label: 'Restaurant',
+      showBill: true,
+      showServizio: true,
+      showParty: true,
+      extraInputs: [],
+      calc(bill, party, opts) {
+        if (opts.servizio) {
+          return {
+            verdict: 'optional',
+            verdictText: 'No tip required',
+            note: '<strong>Servizio incluso</strong> means the service charge is already in your bill. No further tip is expected — but rounding up or leaving €1–5 for outstanding service is a kind gesture.',
+            low: bill > 0 ? roundUp(bill) - bill : 0,
+            mid: bill > 0 ? Math.min(5, bill * 0.05) : 0,
+            high: bill > 0 ? Math.min(10, bill * 0.08) : 0,
+            showAmounts: bill > 0
+          };
+        } else {
+          const low = bill * 0.05;
+          const mid = bill * 0.075;
+          const high = bill * 0.10;
+          return {
+            verdict: 'yes',
+            verdictText: 'Tip appreciated',
+            note: 'No service charge on your bill. Leave <strong>5–10%</strong> as cash on the table after paying — card tips often can\'t be added at the terminal.',
+            low, mid, high,
+            showAmounts: bill > 0
+          };
+        }
+      }
+    },
+    cafe: {
+      label: 'Café / Bar',
+      showBill: true,
+      showServizio: false,
+      showParty: false,
+      extraInputs: [
+        { id: 'cafeType', label: 'Service style', type: 'select', options: [
+          { value: 'counter', label: 'At the counter' },
+          { value: 'table', label: 'Table service' }
+        ]}
+      ],
+      calc(bill, party, opts) {
+        if (opts.cafeType === 'counter') {
+          return {
+            verdict: 'optional',
+            verdictText: 'Not expected',
+            note: 'Standing orders at the bar or counter carry <strong>no tip expectation</strong> in Italy. It\'s completely normal — even for Italians — to pay the exact amount and walk away. Spare change is always welcome, but never anticipated.',
+            low: 0, mid: 0, high: 0,
+            showAmounts: false
+          };
+        } else {
+          return {
+            verdict: 'optional',
+            verdictText: 'Small tip welcome',
+            note: 'For table service at a café, leaving <strong>€0.50–€1</strong> or rounding up to the nearest euro is a polite gesture. Not expected, but appreciated.',
+            low: 0.5, mid: 1, high: bill > 0 ? roundUp(bill) - bill : 1,
+            showAmounts: true
+          };
+        }
+      }
+    },
+    hotel: {
+      label: 'Hotel',
+      showBill: false,
+      showServizio: false,
+      showParty: false,
+      extraInputs: [
+        { id: 'hotelTier', label: 'Hotel type', type: 'select', options: [
+          { value: 'standard', label: '1–3 star — mid-range, limited concierge' },
+          { value: 'four_star', label: '4-star — full-service, room service, concierge' },
+          { value: 'five_star', label: '5-star — luxury, 24-hr service, multilingual staff' }
+        ]},
+        { id: 'hotelService', label: 'Service type', type: 'select', options: [
+          { value: 'porter', label: 'Porter / Bellhop' },
+          { value: 'housekeeping', label: 'Housekeeping' },
+          { value: 'doorman', label: 'Doorman' },
+          { value: 'room_service', label: 'Room Service' },
+          { value: 'concierge_standard', label: 'Concierge — directions, nearby restaurant rec, taxi call' },
+          { value: 'concierge_special', label: 'Concierge — Michelin/booked-out restaurant, event tickets, special arrangement' }
+        ]},
+        { id: 'hotelBags', label: 'Number of bags', type: 'number', min: 1, max: 20, defaultVal: 2, showFor: ['porter'] },
+        { id: 'hotelNights', label: 'Nights stayed', type: 'number', min: 1, max: 30, defaultVal: 3, showFor: ['housekeeping'] }
+      ],
+      calc(bill, party, opts) {
+        const s = opts.hotelService;
+        const tier = opts.hotelTier || 'standard';
+        const bags = parseInt(opts.hotelBags) || 2;
+        const nights = parseInt(opts.hotelNights) || 3;
+        // 1–3 star: base amounts; 4-star: ~1.5x; 5-star: ~2x (per Frommer's guidance)
+        const mult = tier === 'five_star' ? 2 : tier === 'four_star' ? 1.5 : 1;
+        const tierNote = tier === 'five_star' ? ' At a 5-star property, these amounts are typically doubled.' : tier === 'four_star' ? ' At a 4-star property, lean toward the higher end.' : '';
+        const map = {
+          porter: {
+            verdict: 'yes', verdictText: 'Tip expected',
+            low: bags * 1 * mult, mid: bags * 1.5 * mult, high: bags * 2 * mult,
+            note: `<strong>€1–2 per bag</strong> is the baseline. For ${bags} bag${bags !== 1 ? 's' : ''}, that's €${(bags * 1 * mult).toFixed(0)}–€${(bags * 2 * mult).toFixed(0)}.${tierNote}`
+          },
+          housekeeping: {
+            verdict: 'optional', verdictText: 'Tip welcomed',
+            low: nights * 1 * mult, mid: nights * 1.5 * mult, high: nights * 2 * mult,
+            note: `<strong>€1–2 per night</strong>, ideally left daily on the pillow or in a small envelope. For ${nights} night${nights !== 1 ? 's' : ''}, that's €${(nights * 1 * mult).toFixed(0)}–€${(nights * 2 * mult).toFixed(0)}.${tierNote}`
+          },
+          room_service: {
+            verdict: 'optional', verdictText: 'Tip not required',
+            low: 1 * mult, mid: 2 * mult, high: 3 * mult,
+            note: `Room service delivery does not require a tip in Italy, but <strong>€1–2</strong> is a kind gesture, particularly for larger orders or late-night delivery.${tierNote}`
+          },
+          doorman: {
+            verdict: 'optional', verdictText: 'Tip welcomed',
+            low: 1 * mult, mid: 1.5 * mult, high: 2 * mult,
+            note: `<strong>€1–2</strong> for helping with luggage or arranging transport.${tierNote}`
+          },
+          concierge_standard: {
+            verdict: 'optional', verdictText: 'Tip appreciated',
+            low: 5, mid: 7, high: 10,
+            note: 'This covers quick answers that don\'t require research — pointing you to a nearby restaurant, calling a taxi, giving directions, or general area advice. <strong>€5–10</strong>, or nothing at all for very brief help. Leave it discreetly right after they assist you.'
+          },
+          concierge_special: {
+            verdict: 'yes', verdictText: 'Tip strongly encouraged',
+            low: 15, mid: 25, high: 40,
+            note: 'This covers requests that required real effort — getting a table at a restaurant that was fully booked, scoring tickets to a sold-out event, arranging something special. <strong>€15–40+</strong> depending on how difficult the ask was. A normal dinner reservation at an easy-to-book restaurant is <em>routine</em>; a Michelin-starred or popular spot where they had to call in a favor is <em>this</em> category.'
+          }
+        };
+        return { ...map[s], showAmounts: true };
+      }
+    },
+    taxi: {
+      label: 'Taxi / Driver',
+      showBill: true,
+      showServizio: false,
+      showParty: false,
+      extraInputs: [
+        { id: 'taxiType', label: 'Ride type', type: 'select', options: [
+          { value: 'short', label: 'Short / city ride' },
+          { value: 'airport', label: 'Airport transfer' },
+          { value: 'private', label: 'Private driver' }
+        ]}
+      ],
+      calc(bill, party, opts) {
+        const t = opts.taxiType;
+        if (t === 'short') {
+          return {
+            verdict: 'optional', verdictText: 'Round up only',
+            note: 'Tipping taxi drivers is <strong>not obligatory</strong> in Italy. Simply round up to the nearest euro. No tip is expected or required for poor service.',
+            low: bill > 0 ? roundUp(bill) - bill : 0,
+            mid: bill > 0 ? roundUp(bill) - bill : 0,
+            high: bill > 0 ? Math.min(2, (roundUp(bill) - bill) + 0.5) : 0,
+            showAmounts: bill > 0
+          };
+        } else if (t === 'airport') {
+          return {
+            verdict: 'optional', verdictText: 'Small tip appreciated',
+            note: 'For airport runs, <strong>€2–5</strong> is a considerate tip, especially if your driver helped with luggage. Still optional — not culturally expected.',
+            low: 2, mid: 3, high: 5,
+            showAmounts: true
+          };
+        } else {
+          return {
+            verdict: 'yes', verdictText: 'Tip appreciated',
+            note: 'Private drivers who go above and beyond — punctual, helpful, knowledgeable — appreciate a tip. <strong>10%</strong> or a flat €5–15 depending on the journey length is fitting.',
+            low: bill > 0 ? bill * 0.08 : 5,
+            mid: bill > 0 ? bill * 0.10 : 10,
+            high: bill > 0 ? bill * 0.12 : 15,
+            showAmounts: true
+          };
+        }
+      }
+    },
+    tour: {
+      label: 'Tour Guide',
+      showBill: false,
+      showServizio: false,
+      showParty: true,
+      extraInputs: [
+        { id: 'tourType', label: 'Tour type', type: 'select', options: [
+          { value: 'group_large', label: 'Large group — 17+ people (big bus tour)' },
+          { value: 'group_small', label: 'Small group — 16 or fewer people' },
+          { value: 'private', label: 'Private tour — just your party' }
+        ]},
+        { id: 'tourHours', label: 'Tour length (hours)', type: 'number', min: 1, max: 12, defaultVal: 3, showFor: ['private'] }
+      ],
+      calc(bill, party, opts) {
+        const t = opts.tourType;
+        const hours = parseInt(opts.tourHours) || 3;
+        if (t === 'group_large') {
+          return {
+            verdict: 'yes', verdictText: 'Tip expected',
+            note: `Italian guides hold professional credentials, often advanced degrees. <strong>€2–5 per person</strong> is standard for large group tours. For ${party} person${party !== 1 ? 's' : ''}, budget €${party * 2}–€${party * 5}. Always tip in bills, not coins — coins are considered disrespectful.`,
+            low: party * 2, mid: party * 3, high: party * 5,
+            showAmounts: true
+          };
+        } else if (t === 'group_small') {
+          return {
+            verdict: 'yes', verdictText: 'Tip expected',
+            note: `Small group tours warrant more personal recognition. <strong>€10 per person</strong> is considered fair. For ${party} person${party !== 1 ? 's' : ''}, that's €${party * 10}. Always use bills — never coins.`,
+            low: party * 8, mid: party * 10, high: party * 12,
+            showAmounts: true
+          };
+        } else {
+          const mult = hours <= 2 ? 30 : hours <= 4 ? 50 : hours <= 6 ? 75 : 100;
+          return {
+            verdict: 'yes', verdictText: 'Tip strongly encouraged',
+            note: `Private tours are a premium experience. <strong>€30–100+</strong> is appropriate depending on length and quality. For a ${hours}-hour tour, €${mult} is a reasonable benchmark. Bills only — never coins.`,
+            low: mult * 0.7, mid: mult, high: mult * 1.4,
+            showAmounts: true
+          };
+        }
+      }
+    },
+    venice: {
+      label: 'Venice',
+      showBill: true,
+      showServizio: false,
+      showParty: false,
+      extraInputs: [
+        { id: 'veniceType', label: 'Transport type', type: 'select', options: [
+          { value: 'gondola', label: 'Gondola ride' },
+          { value: 'water_taxi', label: 'Water taxi' },
+          { value: 'vaporetto', label: 'Vaporetto (water bus)' }
+        ]}
+      ],
+      calc(bill, party, opts) {
+        const t = opts.veniceType;
+        if (t === 'gondola') {
+          return {
+            verdict: 'optional', verdictText: 'Not expected',
+            note: 'Gondola fares are city-regulated (typically <strong>€80–100 for 30 minutes</strong>) and tips are not expected. If your gondolier sang, shared history, or made the ride genuinely memorable, €5–10 is a gracious gesture — handed discreetly at the end.',
+            low: 5, mid: 7, high: 10, showAmounts: true
+          };
+        } else if (t === 'water_taxi') {
+          return {
+            verdict: 'optional', verdictText: 'Small tip appreciated',
+            note: 'Water taxis are a premium, personalized service. <strong>5–10%</strong> is freely offered, particularly when the driver assists with luggage or provides commentary on the city.',
+            low: bill > 0 ? bill * 0.05 : 3,
+            mid: bill > 0 ? bill * 0.08 : 5,
+            high: bill > 0 ? bill * 0.10 : 10,
+            showAmounts: true
+          };
+        } else {
+          return {
+            verdict: 'optional', verdictText: 'No tip needed',
+            note: 'Vaporettos are public transit — no tip is expected or appropriate. Simply validate your ticket and enjoy the ride.',
+            low: 0, mid: 0, high: 0, showAmounts: false
+          };
+        }
+      }
+    },
+    other: {
+      showBill: true,
+      showServizio: false,
+      showParty: false,
+      extraInputs: [
+        { id: 'otherType', label: 'Service type', type: 'select', options: [
+          { value: 'spa', label: 'Spa / Salon' },
+          { value: 'cloakroom', label: 'Cloakroom / Coat Check' },
+          { value: 'delivery', label: 'Food delivery' },
+          { value: 'restroom', label: 'Restroom attendant' },
+          { value: 'musician', label: 'Street performer' }
+        ]}
+      ],
+      calc(bill, party, opts) {
+        const map = {
+          spa: {
+            verdict: 'optional', verdictText: 'Tip not required',
+            note: 'Tipping at spas and salons is not expected in Italy. If the service was exceptional, <strong>rounding up or leaving 10%</strong> is a thoughtful gesture — but never obligatory.',
+            low: bill > 0 ? bill * 0.05 : 0,
+            mid: bill > 0 ? bill * 0.08 : 0,
+            high: bill > 0 ? bill * 0.10 : 0,
+            showAmounts: bill > 0
+          },
+          cloakroom: {
+            verdict: 'optional', verdictText: 'Small tip welcomed',
+            note: 'Cloakroom attendants at Italian restaurants and theaters typically expect <strong>€0.75–€1 per item</strong>. Have coins ready — this is one of the few cases where coins are perfectly appropriate.',
+            low: 0.75, mid: 1, high: 1.5, showAmounts: true
+          },
+          delivery: {
+            verdict: 'optional', verdictText: 'Small tip welcomed',
+            note: '<strong>€1–2</strong> for food delivery, especially for large orders or great service. Leave cash at the door.',
+            low: 1, mid: 1.5, high: 2, showAmounts: true
+          },
+          restroom: {
+            verdict: 'optional', verdictText: 'Small coin fine here',
+            note: 'Restroom attendants are one of the few cases where <strong>€0.50–€1 in coins</strong> is perfectly acceptable. Leave it in the dish on the counter.',
+            low: 0.5, mid: 0.5, high: 1, showAmounts: true
+          },
+          musician: {
+            verdict: 'optional', verdictText: 'At your discretion',
+            note: 'Tip street performers based on your enjoyment. <strong>€1–2</strong> is a generous acknowledgment. No cultural pressure either way.',
+            low: 1, mid: 1.5, high: 2, showAmounts: true
+          }
+        };
+        return map[opts.otherType];
+      }
+    }
+  };
+
+  const phrases = [
+    { it: "Grazie mille, è stato tutto perfetto.", en: "Thank you so much, everything was perfect." },
+    { it: "È per lei — ha fatto un lavoro eccellente.", en: "This is for you — you did an excellent job." },
+    { it: "Tenga il resto, grazie.", en: "Keep the change, thank you." },
+    { it: "Siamo stati benissimo, grazie di cuore.", en: "We had a wonderful time, thank you from the heart." },
+    { it: "Ha reso la nostra visita davvero speciale.", en: "You made our visit truly special." },
+    { it: "È stato un piacere, grazie per tutto.", en: "It was a pleasure, thank you for everything." },
+    { it: "Complimenti — servizio impeccabile.", en: "Compliments — impeccable service." },
+    { it: "Ci ha fatto sentire i benvenuti, grazie.", en: "You made us feel very welcome, thank you." },
+    { it: "È per lei, con i nostri complimenti.", en: "This is for you, with our compliments." },
+    { it: "Torneremo sicuramente — grazie mille.", en: "We will definitely come back — thank you so much." },
+    { it: "Lei è stato una guida straordinaria.", en: "You were an extraordinary guide." },
+    { it: "Grazie per la sua gentilezza e pazienza.", en: "Thank you for your kindness and patience." },
+  ];
+
+  function getPhrase() {
+    return phrases[Math.floor(Math.random() * phrases.length)];
+  }
+
+  function showCopertoNote() {
+    const checked = document.getElementById('copertoCheck').checked;
+    document.getElementById('copertoNote').classList.toggle('hidden', !checked);
+  }
+
+  function togglePanel(id) {
+    // Don't allow opening panel 2 without a scenario selected
+    if (id === 'panelTipping' && !currentScenario) return;
+    const panel = document.getElementById(id);
+    const body = document.getElementById(id.replace('panel', 'body'));
+    const chevron = document.getElementById(id.replace('panel', 'chevron'));
+    const isOpen = !body.classList.contains('hidden');
+    if (isOpen) {
+      body.classList.add('hidden');
+      panel.classList.remove('active');
+      chevron.textContent = '▼';
+      chevron.style.transform = '';
+    } else {
+      body.classList.remove('hidden');
+      panel.classList.add('active');
+      chevron.textContent = '▲';
+      chevron.style.transform = '';
+      // collapse the others
+      ['panelSituation', 'panelTipping', 'panelGuide'].forEach(other => {
+        if (other !== id) {
+          const ob = document.getElementById(other.replace('panel', 'body'));
+          const oc = document.getElementById(other.replace('panel', 'chevron'));
+          const op = document.getElementById(other);
+          ob.classList.add('hidden');
+          op.classList.remove('active');
+          oc.textContent = '▼';
+          oc.style.transform = '';
+        }
+      });
+    }
+  }
+
+  function toggleGuide() {
+    togglePanel('panelGuide');
+  }
+
+  function roundUp(n) {
+    return Math.ceil(n);
+  }
+
+  function fmt(n) {
+    if (n === undefined || n === null || isNaN(n)) return '—';
+    return '€' + n.toFixed(2).replace(/\.00$/, '').replace(/\.(\d)$/, '.$10');
+  }
+
+  function selectScenario(id) {
+    currentScenario = id;
+    document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`[data-id="${id}"]`).classList.add('active');
+
+    const s = scenarios[id];
+
+    // Bill row
+    const billRow = document.getElementById('billRow');
+    if (s.showBill) {
+      billRow.classList.remove('hidden');
+    } else {
+      billRow.classList.add('hidden');
+      document.getElementById('billInput').value = '';
+    }
+
+    // Servizio / coperto toggles
+    const servizioRow = document.getElementById('servizioRow');
+    const copertoRow = document.getElementById('copertoRow');
+    const copertoNote = document.getElementById('copertoNote');
+    if (s.showServizio) {
+      servizioRow.classList.remove('hidden');
+      copertoRow.classList.remove('hidden');
+    } else {
+      servizioRow.classList.add('hidden');
+      copertoRow.classList.add('hidden');
+      copertoNote.classList.add('hidden');
+      document.getElementById('servizioCheck').checked = false;
+      document.getElementById('copertoCheck').checked = false;
+    }
+
+    // Party row
+    const partyRow = document.getElementById('partyRow');
+    if (s.showParty) {
+      partyRow.classList.remove('hidden');
+    } else {
+      partyRow.classList.add('hidden');
+    }
+
+    // Extra inputs
+    renderExtraInputs(s);
+    calculate();
+
+    // Update tipping panel title to reflect selected scenario
+    document.getElementById('tippingPanelTitle').textContent = s.label + ' — Tipping Details';
+
+    // Collapse situation panel, open tipping panel
+    const sitBody = document.getElementById('bodySituation');
+    const sitChev = document.getElementById('chevronSituation');
+    const sitPanel = document.getElementById('panelSituation');
+    sitBody.classList.add('hidden');
+    sitPanel.classList.remove('active');
+    sitChev.textContent = '▼';
+
+    // Open tipping panel, remove disabled state
+    const tipBody = document.getElementById('bodyTipping');
+    const tipChev = document.getElementById('chevronTipping');
+    const tipPanel = document.getElementById('panelTipping');
+    tipPanel.classList.remove('disabled');
+    tipBody.classList.remove('hidden');
+    tipPanel.classList.add('active');
+    tipChev.textContent = '▲';
+
+    // Collapse guide panel
+    const guideBody = document.getElementById('bodyGuide');
+    const guideChev = document.getElementById('chevronGuide');
+    const guidePanel = document.getElementById('panelGuide');
+    guideBody.classList.add('hidden');
+    guidePanel.classList.remove('active');
+    guideChev.textContent = '▼';
+
+    // Scroll to tipping panel
+    setTimeout(() => tipPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+  }
+
+  function renderExtraInputs(s) {
+    const container = document.getElementById('extraInputs');
+    container.innerHTML = '';
+    (s.extraInputs || []).forEach(inp => {
+      const row = document.createElement('div');
+      row.className = 'extra-row';
+      row.id = 'row_' + inp.id;
+
+      const label = document.createElement('label');
+      label.textContent = inp.label;
+      label.htmlFor = inp.id;
+
+      if (inp.type === 'select') {
+        const sel = document.createElement('select');
+        sel.id = inp.id;
+        inp.options.forEach(o => {
+          const opt = document.createElement('option');
+          opt.value = o.value;
+          opt.textContent = o.label;
+          sel.appendChild(opt);
+        });
+        sel.onchange = () => { updateConditionalInputs(s); calculate(); };
+        row.appendChild(label);
+        row.appendChild(sel);
+      } else if (inp.type === 'number') {
+        const numInput = document.createElement('input');
+        numInput.type = 'number';
+        numInput.id = inp.id;
+        numInput.min = inp.min;
+        numInput.max = inp.max;
+        numInput.value = inp.defaultVal || 1;
+        numInput.style.cssText = 'border:none;outline:none;background:transparent;font-family:DM Sans,sans-serif;font-size:16px;font-weight:500;color:#C4572A;text-align:right;width:60px;';
+        numInput.oninput = calculate;
+        row.appendChild(label);
+        row.appendChild(numInput);
+      }
+
+      container.appendChild(row);
+    });
+
+    updateConditionalInputs(s);
+  }
+
+  function updateConditionalInputs(s) {
+    (s.extraInputs || []).forEach(inp => {
+      if (inp.showFor) {
+        const primarySel = s.extraInputs.find(i => i.type === 'select' && !i.showFor);
+        if (primarySel) {
+          const currentVal = document.getElementById(primarySel.id)?.value;
+          const row = document.getElementById('row_' + inp.id);
+          if (row) {
+            row.style.display = inp.showFor.includes(currentVal) ? 'flex' : 'none';
+          }
+        }
+      }
+    });
+  }
+
+  function getOpts(s) {
+    const opts = {};
+    opts.servizio = document.getElementById('servizioCheck')?.checked || false;
+    (s.extraInputs || []).forEach(inp => {
+      const el = document.getElementById(inp.id);
+      if (el) opts[inp.id] = el.value;
+    });
+    return opts;
+  }
+
+  function changeParty(delta) {
+    partySize = Math.max(1, Math.min(20, partySize + delta));
+    document.getElementById('partyCount').textContent = partySize;
+    calculate();
+  }
+
+  function calculate() {
+    if (!currentScenario) return;
+    const s = scenarios[currentScenario];
+    const bill = parseFloat(document.getElementById('billInput')?.value) || 0;
+    const opts = getOpts(s);
+    const result = s.calc(bill, partySize, opts);
+    renderResult(result, bill, s);
+  }
+
+  function renderResult(r, bill, s) {
+    const area = document.getElementById('resultArea');
+    if (!r) { area.innerHTML = ''; return; }
+
+    const dotClass = { yes: 'yes', optional: 'optional', no: 'no' }[r.verdict];
+    const perPersonBill = s.showParty && partySize > 1 && bill > 0 ? bill / partySize : null;
+    const perPersonTip = s.showParty && partySize > 1 && r.mid ? r.mid / partySize : null;
+
+    let amountsHTML = '';
+    if (r.showAmounts) {
+      amountsHTML = `
+        <div class="result-amounts">
+          <div class="amount-box">
+            <div class="a-label">Minimum</div>
+            <div class="a-value">${fmt(r.low)}</div>
+          </div>
+          <div class="amount-box highlight">
+            <div class="a-label">Suggested</div>
+            <div class="a-value">${fmt(r.mid)}</div>
+          </div>
+          <div class="amount-box">
+            <div class="a-label">Generous</div>
+            <div class="a-value">${fmt(r.high)}</div>
+          </div>
+        </div>`;
+    }
+
+    let perPersonHTML = '';
+    if (perPersonBill || perPersonTip) {
+      perPersonHTML = `
+        <div class="per-person">
+          <div class="per-person-title">Per person breakdown</div>
+          <div class="per-person-grid">
+            ${perPersonBill ? `<div class="pp-item"><span class="pp-label">Bill share</span><span class="pp-val">${fmt(perPersonBill)}</span></div>` : ''}
+            ${perPersonTip ? `<div class="pp-item"><span class="pp-label">Tip share</span><span class="pp-val">${fmt(perPersonTip)}</span></div>` : ''}
+            ${perPersonBill && perPersonTip ? `<div class="pp-item"><span class="pp-label">Total each</span><span class="pp-val">${fmt(perPersonBill + perPersonTip)}</span></div>` : ''}
+          </div>
+        </div>`;
+    }
+
+    const phrase = r.verdict !== 'no' ? getPhrase() : null;
+    const phraseHTML = phrase ? `
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);position:relative;">
+        <div style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.25);margin-bottom:6px;">Something to say</div>
+        <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:16px;color:var(--gold-light);margin-bottom:3px;">"${phrase.it}"</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.4);">${phrase.en}</div>
+      </div>` : '';
+
+    area.innerHTML = `
+      <div class="result-card">
+        <div class="result-verdict">
+          <div class="verdict-dot ${dotClass}"></div>
+          <div class="verdict-text">${r.verdictText}</div>
+        </div>
+        ${amountsHTML}
+        <div class="result-note">${r.note}</div>
+        ${phraseHTML}
+      </div>
+      ${perPersonHTML}
+    `;
+  }
+</script>
+
+</body>
+</html>
